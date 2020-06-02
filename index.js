@@ -22,7 +22,6 @@ http.createServer(function (req, res) {
         await page.waitForSelector('input[name="password"]')
     	await page.type('input[name="password"]', PASSWORD)
    	await page.click('[type="submit"]')
-
   	//await page.waitForNavigation()
   	await page.goto('https://legacy.hometime.fr'+q.pathname, {waitUntil: 'networkidle0'})
 	await page.pdf({path: 'page.pdf', displayHeaderFooter: false, printBackground: true});
