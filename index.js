@@ -28,16 +28,16 @@ http.createServer(function (req, res) {
 
 	await browser.close();
 
-  fs.readFile('./page.pdf', function(err, data) {
-    if (err) {
-      res.writeHead(404, {'Content-Type': 'text/html'});
-      res.write("file name :"+filename+"\n");
-      return res.end("404 Not Found");
-    } 
-    res.writeHead(200, {'Content-Type': 'application/pdf'});
-    res.write(data);
-    return res.end();
-  });
-	})();
+	fs.readFile('./page.pdf', function(err, data) {
+    		if (err) {
+      		res.writeHead(404, {'Content-Type': 'text/html'});
+      		res.write("file name :"+filename+"\n");
+      		return res.end("404 Not Found");
+    	} 
+    	res.writeHead(200, {'Content-Type': 'application/pdf'});
+    	res.write(data);
+    	return res.end();
+  	});
+ })();
 }).listen(PORT);
 
