@@ -18,7 +18,7 @@ http.createServer(function (req, res) {
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
             });
 	const page = await browser.newPage();
-	await page.goto('https://legacy.hometime.fr/quick-login', {waitUntil: 'networkidle2'});
+	await page.goto('https://legacy.hometime.fr/quick-login', {waitUntil: 'networkidle0'});
         await page.waitForSelector('input[name="password"]')
     	await page.type('input[name="password"]', PASSWORD)
    	await page.click('[type="submit"]')
