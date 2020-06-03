@@ -14,6 +14,8 @@ http.createServer(function (req, res) {
   var filename = "." + q.pathname;
   
   (async() => {
+	console.log('querying '+q.pathname)
+	const filename = 'page'+Math.random().toString(36).substring(7)+'.pdf'
 	const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
             });
@@ -23,12 +25,14 @@ http.createServer(function (req, res) {
     	await page.type('input[name="password"]', PASSWORD)
    	await page.click('[type="submit"]')
   	//await page.waitForNavigation()
+        await page.waitForSelector('.navbar')
+	console.log('login successfull')
   	await page.goto('https://legacy.hometime.fr'+q.pathname, {waitUntil: 'networkidle0'})
-	await page.pdf({path: 'page.pdf', displayHeaderFooter: false, printBackground: true});
+	await page.pdf({path: filename, preferCSSPageSize: true, displayHeaderFooter: false, printBackground: true});
 
 	await browser.close();
 
-	fs.readFile('./page.pdf', function(err, data) {
+	fs.readFile('./'+filename, function(err, data) {
     		if (err) {
       		res.writeHead(404, {'Content-Type': 'text/html'});
       		res.write("file name :"+filename+"\n");
@@ -38,6 +42,13 @@ http.createServer(function (req, res) {
     	res.write(data);
     	return res.end();
   	});
+	fs.unlink('./'+filename, (err) => {
+  		if (err) {
+    			console.error(err);
+    			return;
+  		}
+	});
+	console.log('end of '+q.pathname+' management');
  })();
 }).listen(PORT);
 
