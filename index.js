@@ -28,6 +28,7 @@ http.createServer(function (req, res) {
         await page.waitForSelector('.navbar')
 	console.log('login successfull')
   	await page.goto('https://legacy.hometime.fr'+q.pathname, {waitUntil: 'networkidle0'})
+        const pagetitle = await page.title();
 	await page.pdf({path: filename, preferCSSPageSize: true, displayHeaderFooter: false, printBackground: true});
 
 	await browser.close();
@@ -38,7 +39,7 @@ http.createServer(function (req, res) {
       		res.write("file name :"+filename+"\n");
       		return res.end("404 Not Found");
     	} 
-    	res.writeHead(200, {'Content-Type': 'application/pdf'});
+    	res.writeHead(200, {'Content-Type': 'application/pdf; name='+pagetitle+'.pdf', 'content-disposition': 'inline; filename='+pagetitle+'.pdf'});
     	res.write(data);
     	return res.end();
   	});
