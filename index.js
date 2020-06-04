@@ -8,10 +8,17 @@ var http = require('http');
 var url = require('url');
 var fs = require('fs');
 const PASSWORD = process.env.HOMETIME_PASSWORD || "unknown";
+const ACCOUNT = process.env.HOMETIME_ACCOUNT_EMAIL || "unknown";
 
 http.createServer(function (req, res) {
+  if (PASSWORD === "unknown" || ACCOUNT === "unknown") {
+	res.writeHead(500, {'Content-Type': 'text/html'});
+        res.write("Error in configuration of the module");
+        return res.end();
+  } else  {
   var q = url.parse(req.url, true);
   var filename = "." + q.pathname;
+  const trustedkey = req.headers['trustedkey'];
   
   (async() => {
 	console.log('querying '+q.pathname)
@@ -20,13 +27,21 @@ http.createServer(function (req, res) {
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
             });
 	const page = await browser.newPage();
-	await page.goto('https://legacy.hometime.fr/quick-login', {waitUntil: 'networkidle0'});
-        await page.waitForSelector('input[name="password"]')
-    	await page.type('input[name="password"]', PASSWORD)
-   	await page.click('[type="submit"]')
-  	//await page.waitForNavigation()
-        await page.waitForSelector('.navbar')
-	console.log('login successfull')
+	if ( typeof trustedkey === "undefined") {
+		console.log('logging in needed')
+		await page.goto('https://legacy.hometime.fr/quick-login', {waitUntil: 'networkidle0'});
+        	await page.waitForSelector('input[name="password"]')
+    		await page.type('input[name="password"]', PASSWORD)
+   		await page.click('[type="submit"]')
+  		//await page.waitForNavigation()
+        	await page.waitForSelector('.navbar')
+		console.log('login successfull')
+	} else {	
+		console.log('direct access through shared secret')
+		await page.setExtraHTTPHeaders(
+   			{'trustedkey': trustedkey, 'token': ACCOUNT}
+		);	
+	}
   	await page.goto('https://legacy.hometime.fr'+q.pathname, {waitUntil: 'networkidle0'})
         const pagetitle = await page.title();
 	await page.pdf({path: filename, preferCSSPageSize: true, displayHeaderFooter: false, printBackground: true});
@@ -51,5 +66,6 @@ http.createServer(function (req, res) {
 	});
 	console.log('end of '+q.pathname+' management');
  })();
+ }
 }).listen(PORT);
 
